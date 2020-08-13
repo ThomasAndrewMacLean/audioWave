@@ -36,8 +36,12 @@ export default class MyDocument extends Document {
                 return false;
             });`,
             }}
-          ></script> */}
-
+          ></script> */}{' '}
+          <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/3.0.16/svg.js"
+            integrity="sha256-xvPMiuI2yhll8na232NQ1y4TB2G8QzRKc1gEqImu4Ms="
+            crossorigin="anonymous"
+          ></script>
           <script src="https://use.fontawesome.com/040f5e91ce.js"></script>
         </Head>
         <body>

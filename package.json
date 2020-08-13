@@ -39,6 +39,7 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "styled-components": "^5.0.1",
+    "svgjs": "^2.6.2",
     "zustand": "^2.2.3"
   },
   "devDependencies": {

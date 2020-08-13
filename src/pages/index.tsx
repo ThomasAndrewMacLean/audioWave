@@ -1,3 +1,4 @@
+//@ts-nocheck
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 // import PropTypes from 'prop-types';
@@ -11,6 +12,103 @@ import {
 } from '../utils/contexts';
 import { getDataFromAirtable } from '../utils';
 import { TranslationsType, ImagesType, SEOType } from '../types';
+let prevHeight = 0;
+
+// DRAW BUFFER FUNCTION
+// *** takes { width, height } from your target element & it's { context }
+// *** takes { buffer } as a decoded audio buffer
+// *** and draws the audio buffer as a SVG waveform in target element
+function drawBuffer(context, buffer) {
+  console.log('drawing fired');
+
+  let width = context.canvas.clientWidth;
+  let height = context.canvas.clientHeight;
+
+  // channel data (samples)
+  let data = buffer;
+
+  // sample step size
+  let step = Math.ceil(data.length / width);
+  // amp
+  let amp = height / 2;
+
+  let prevHeight = 0;
+
+  let sum = data.reduce((previous, current) => (current += previous));
+  let avg = (sum / data.length) * amp;
+
+  console.log(avg);
+
+  // loop x-pos
+  for (var i = 0; i < width; i++) {
+    let min = 1.0;
+    let max = -1.0;
+
+    // zoom samples
+    for (let j = 0; j < step; j++) {
+      let block = data[i * step + j];
+      if (block < min) {
+        min = block;
+      }
+      if (block > max) {
+        max = block;
+      }
+    }
+
+    // bar data
+    let w = 1;
+    let h = Math.max(1, (max - min) * amp);
+    let x = i;
+    let y = (height - h) / 2;
+
+    if (
+      Math.abs(h, prevHeight) < 10 &&
+      Math.abs(h, prevHeight) > 1 &&
+      !(h > height) &&
+      !(Math.abs(h, prevHeight) > 50)
+    ) {
+      h = Math.max(1, (max - min) * (amp * 10));
+      y = (height - h) / 2;
+      prevHeight = 0;
+      // console.log("current: ", h);
+    }
+
+    context.rect(w, h, 10, 10).move(x, y).fill('#000').attr('fill-opacity', 1);
+    prevHeight = h;
+
+    // console.log("prev: ", prevHeight);
+  }
+}
+
+function isEven(n) {
+  return n % 2 == 0;
+}
+
+// READ AUDIO FILE AS ARRAY BUFFER
+// *** outputs decoded array buffer
+function readAudioFile(audio_file) {
+  // initialize new temp FileReader object
+  const fileReader = new FileReader();
+
+  return new Promise((resolve, reject) => {
+    // when read succesfully
+    fileReader.onload = () => {
+      // decode audio array buffer
+      audioContext.decodeAudioData(fileReader.result).then((audio_buffer) => {
+        // resolve promise with decoded buffer
+        resolve(audio_buffer);
+      });
+    };
+
+    // when there's an error
+    fileReader.onerror = () => {
+      fileReader.abort(); // abort fileReader
+      reject(fileReader.error); // reject promise; include error
+    };
+
+    fileReader.readAsArrayBuffer(audio_file);
+  });
+}
 
 let onError = function (err) {
   console.log('The following error occured: ' + err);
@@ -25,10 +123,14 @@ const IndexPage = ({ translations, pics, seo }: IndexPageProps) => {
     const mediaRecorder = new MediaRecorder(stream);
 
     mediaRecorder.onstop = function (e) {
-      const audio = document.createElement('audio');
+      const c = document.getElementById('canvas');
+      console.log(chunks);
       const blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
-      chunks = [];
       const audioURL = window.URL.createObjectURL(blob);
+
+      // drawBuffer(c.getContext('2d'), chunks);
+      const audio = document.createElement('audio');
+      chunks = [];
       audio.src = audioURL;
       audio.controls = true;
       document.getElementById('test').appendChild(audio);
@@ -119,7 +221,7 @@ const IndexPage = ({ translations, pics, seo }: IndexPageProps) => {
                 </button>
               </Create>
               <Canvas>
-                <canvas></canvas>
+                <canvas id="canvas"></canvas>
               </Canvas>
             </Main>
           </Layout>
