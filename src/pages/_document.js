@@ -37,6 +37,8 @@ export default class MyDocument extends Document {
             });`,
             }}
           ></script> */}
+
+          <script src="https://use.fontawesome.com/040f5e91ce.js"></script>
         </Head>
         <body>
           <Main />

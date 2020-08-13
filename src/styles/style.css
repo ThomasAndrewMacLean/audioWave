@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@200;400&display=swap');
 
 :root {
-  --background-dark: #77f;
+  --background-dark: #f4efe8;
   --border: 3px solid black;
 }
 * {
@@ -17,7 +17,7 @@
 html,
 body {
   font-family: 'Roboto Slab', sans-serif;
-
+  background: var(--background-dark);
   width: 100%;
   overflow-x: hidden;
 }
